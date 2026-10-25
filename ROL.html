@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crónicas · Rol online</title>
+<style>
+:root{--bg:#000;--p:#0b0b0b;--c:#141414;--bd:#262626;--tx:#ececec;--mu:#8d8d8d;--ac:#d4a24c;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+#app{height:100%;display:flex;flex-direction:column}
+button,input,textarea,select{font:inherit;color:inherit}
+button{background:var(--c);border:1px solid var(--bd);border-radius:8px;padding:6px 11px;cursor:pointer}
+button:hover{border-color:var(--ac)}
+button.on,button.pri{background:var(--ac);color:#000;border-color:var(--ac);font-weight:600}
+input,textarea,select{width:100%;padding:8px 10px;background:var(--p);border:1px solid var(--bd);border-radius:8px}
+label{display:block;margin-top:10px;font-size:13px;color:var(--mu)}
+.mu{color:var(--mu)}.sm{font-size:13px}
+.box{max-width:420px;margin:8vh auto;padding:22px;background:var(--p);border:1px solid var(--bd);border-radius:14px;width:calc(100% - 28px)}
+.tabs{display:flex;gap:6px;margin:14px 0}.tabs button{flex:1}
+.top{display:flex;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--bd);background:var(--p)}
+.top input{flex:1;min-width:0}.logo{white-space:nowrap}.lg{background:none;border:0;font-weight:700;font-size:15px;padding:4px 6px}.lg:hover{color:var(--ac)}
+.av{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--ac);color:#000;align-items:center;justify-content:center;font-weight:700;margin-right:6px}
+.body{flex:1;display:flex;min-height:0;position:relative}
+aside{width:260px;flex:none;border-right:1px solid var(--bd);overflow:auto;padding:12px;background:var(--p)}
+aside h4{margin:14px 0 6px;color:var(--mu);font-size:12px;text-transform:uppercase;letter-spacing:.08em}aside h4:first-child{margin-top:0}
+.it{display:block;width:100%;text-align:left;margin-bottom:5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.it.cur{border-color:var(--ac)}
+#main{flex:1;min-width:0;overflow:auto;padding:16px;display:flex;flex-direction:column}
+.empty{margin:auto;text-align:center;color:var(--mu);max-width:340px}
+.chh{display:flex;justify-content:space-between;gap:10px;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--bd)}
+#msgs{flex:1;overflow:auto;padding:10px 0}
+.m{font-size:var(--fs,15px);max-width:85%;margin:8px 0;padding:8px 12px;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--cb,var(--c));color:var(--cbt,inherit)}
+.m.u{margin-left:auto;background:var(--ub,#2a2112);color:var(--ubt,inherit);border:1px solid var(--ubd,#4a3a1c)}
+.m b{display:block;font-size:12px;color:var(--ac)}
+.cmp{display:flex;gap:8px;align-items:flex-end}.cmp textarea{resize:none}.mh{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.m .mn summary{padding:0 8px;border:0;background:none;font-size:18px;line-height:1;opacity:.7}.m .mi{color:var(--tx)}.fb{display:flex;gap:6px;margin-top:6px}.fb button{padding:2px 8px;font-size:13px}.m textarea{width:100%;min-width:220px;color:var(--tx)}
+.card{background:var(--c);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px;max-width:560px}
+#mb{display:none}.hb{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.hb input{width:180px}.sa{width:20px;height:20px;border-radius:5px;object-fit:cover;vertical-align:middle;margin-right:6px}.ph{width:150px;height:150px;flex:none;border:1px dashed var(--bd);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--p);color:var(--mu);font-size:13px}.ph img{width:100%;height:100%;object-fit:cover}.ch-av{float:left;width:40px;height:40px;border-radius:10px;object-fit:cover;margin-right:10px}.mn{position:relative}.mn summary{cursor:pointer;list-style:none;background:var(--c);border:1px solid var(--bd);border-radius:8px;padding:6px 11px}.mn summary::-webkit-details-marker{display:none}.mn[open] .mi{position:absolute;right:0;top:calc(100% + 4px);z-index:6;background:var(--p);border:1px solid var(--bd);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:2px;min-width:180px}.mn .mi button{text-align:left;border:0;background:none}.mn .mi button:hover{background:var(--c)}
+@media(max-width:760px){#mb{display:inline-block}aside{position:absolute;z-index:5;top:0;bottom:0;left:0;transform:translateX(-100%);transition:transform .2s}body.sb aside{transform:none}#pn{display:none}}
+</style></head><body>
+<div id="app"></div>
+<script>
+const app=document.getElementById('app'),$=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let set={fs:'n',ty:1},par={on:0,pin:''},parOK=0,db,user,sample,me,uid,prof,view='chat',cur=null,chars={},metas={},msgs=[],msub=null,q='',busy=false,subs=[];
+const col=()=>'data/users/'+uid,mp=id=>col()+'/h_'+id+'/m';
+const MAXM=2000;
+
+let LOCAL=false;
+/* Guardado local: si la página se abre fuera de claude.ai no hay base de datos, así que se guarda en este navegador */
+function mkLocalDb(){
+  const KEY='cr_local_db';let st={};try{st=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){throw{code:'quota_exceeded',message:'Almacenamiento del navegador lleno'}}};
+  const ls=new Set(),fire=()=>ls.forEach(f=>{try{f()}catch(e){}});
+  const rows=(p,o,l)=>{const r=Object.keys(st).filter(k=>k.startsWith(p+'/')&&!k.slice(p.length+1).includes('/')).map(k=>({id:k.slice(p.length+1),exists:true,data:()=>JSON.parse(JSON.stringify(st[k]))}));
+    if(o)r.sort((a,b)=>{const x=a.data()[o[0]],y=b.data()[o[0]];return(x>y?1:x<y?-1:0)*(o[1]=='desc'?-1:1)});return r.slice(0,l)};
+  const doc=p=>({id:p.split('/').pop(),path:p,
+    async get(){const e=p in st;return{id:p.split('/').pop(),exists:e,data:()=>e?JSON.parse(JSON.stringify(st[p])):undefined}},
+    async set(d){st[p]=JSON.parse(JSON.stringify(d));persist();fire()},
+    async update(d){if(!(p in st))throw{code:'invalid_argument',message:'El documento no existe'};Object.assign(st[p],JSON.parse(JSON.stringify(d)));persist();fire()},
+    async delete(){delete st[p];persist();fire()}});
+  const collection=p=>{let o=null,l=1000;const q={orderBy(f,d){o=[f,d||'asc'];return q},limit(n){l=n;return q},async get(){return{docs:rows(p,o,l)}},
+    onSnapshot(cb){const f=()=>cb({docs:rows(p,o,l)});ls.add(f);setTimeout(f,0);return()=>ls.delete(f)},
+    async add(d){const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);await doc(p+'/'+id).set(d);return doc(p+'/'+id)}};return q};
+  return{doc,collection};
+}
+/* Reintentos y mensajes claros cuando falla un guardado */
+const ERR={invalid_argument:'No se pudo guardar: tu acceso no permite escribir (hace falta permiso de Colaborador) o los datos no son válidos.',quota_exceeded:'No se pudo guardar: el almacenamiento está lleno. Borra mensajes o personajes y vuelve a intentarlo.',resource_exhausted:'Demasiadas operaciones seguidas. Espera unos segundos e inténtalo de nuevo.',unavailable:'Sin conexión con la base de datos. Inténtalo de nuevo.'};
+async function retry(f){for(let i=0;;i++){try{return await f()}catch(e){const c=e&&e.code;
+  if(i<2&&(c=='unavailable'||c=='resource_exhausted')){await new Promise(r=>setTimeout(r,400*(i+1)+Math.random()*400));continue}
+  if(c&&ERR[c]){try{e.message=ERR[c]}catch(x){}toast(ERR[c])}throw e}}}
+function wrapDb(d){
+  const wd=r=>({id:r.id,path:r.path,get:()=>retry(()=>r.get()),set:x=>retry(()=>r.set(x)),update:x=>retry(()=>r.update(x)),delete:()=>retry(()=>r.delete())});
+  const wc=q=>({orderBy:(...a)=>wc(q.orderBy(...a)),limit:n=>wc(q.limit(n)),get:()=>retry(()=>q.get()),onSnapshot:(...a)=>q.onSnapshot(...a),add:x=>retry(()=>q.add(x))});
+  return{doc:p=>wd(d.doc(p)),collection:p=>wc(d.collection(p))};
+}
+async function delAll(refs){for(let i=0;i<refs.length;i+=6)await Promise.all(refs.slice(i,i+6).map(r=>r.delete()))}
+async function init(){
+  try{db=await claude.use('db');user=await claude.use('user')}catch(e){}
+  try{sample=await claude.use('sample')}catch(e){}
+  if(db&&user){try{me=await user.me();uid=me.id}catch(e){}}
+  if(!uid){LOCAL=true;db=mkLocalDb();me={id:'local',name:''};uid='local';sample=null}
+  db=wrapDb(db);
+  if(!LOCAL){try{if((await user.can('data.write'))===false)toast('Tu acceso es de solo lectura: para guardar necesitas permiso de Colaborador. Pídeselo al dueño de la página.')}catch(e){}}
+  try{const s=await db.doc(col()+'/profile').get();prof=s.exists?s.data():null}catch(e){prof=null}
+  try{const a=await db.doc(col()+'/settings').get();if(a.exists)set={...set,...a.data()};const b=await db.doc(col()+'/parental').get();if(b.exists)par={...par,...b.data()}}catch(e){}
+  try{const l=await db.doc(col()+'/lastchat').get();if(l.exists)lastId=l.data().id}catch(e){}
+  try{const dr=await db.doc(col()+'/draft').get();if(dr.exists)draft=dr.data()}catch(e){}
+  let ok=false;try{ok=localStorage.getItem('cr_ok')==uid}catch(e){}
+  if(ok&&prof)enter();else auth('in');
+}
+function savedEmail(){try{return localStorage.getItem('cr_email')||(prof&&prof.email)||''}catch(e){return(prof&&prof.email)||''}}
+function remember(e){try{localStorage.setItem('cr_ok',uid);localStorage.setItem('cr_email',e)}catch(x){}}
+function login(){const e=$('le').value.trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return markReq('le');
+  if(!prof){alert('No hay ninguna cuenta con ese e-mail. Regístrate primero.');return auth('up')}
+  if(!prof.email){alert('Tu perfil no tiene e-mail. Pulsa «Registrarte» para añadirlo.');return auth('up')}
+  if(prof.email.toLowerCase()!==e){markReq('le');return alert('Ese e-mail no coincide con el de tu cuenta.')}
+  remember(e);enter()}
+function auth(m){
+  app.innerHTML=`<div class="box"><h2>🐉 Crónicas</h2><p class="mu">Crea personajes, habla con ellos y retoma tus historias cuando quieras.</p>
+  <div class="tabs"><button class="${m=='in'?'on':''}" onclick="auth('in')">Iniciar sesión</button><button class="${m=='up'?'on':''}" onclick="auth('up')">Registrarte</button></div>
+  ${m=='in'?`<label>E-mail</label><input id="le" type="email" maxlength="80" placeholder="nombre@correo.com" value="${esc(savedEmail())}" onkeydown="if(event.key=='Enter')login()"><button class="pri" style="margin-top:12px" onclick="login()">Iniciar sesión</button><p class="mu sm">Usa el e-mail con el que te registraste. Si aún no tienes cuenta, pulsa «Registrarte».</p>`
+  :`${profFields(prof,me)}<button class="pri" style="margin-top:12px" onclick="reg()">${prof?'Actualizar y entrar':'Crear cuenta'}</button>`}
+  <p class="mu sm">Tu identidad es tu cuenta de claude.ai; no se guardan contraseñas.</p></div>`;
+}
+async function reg(){
+  const x=pdata();if(!x)return;
+  const d={...x,createdAt:prof?prof.createdAt:Date.now()},first=!prof;
+  try{await db.doc(col()+'/profile').set(d);prof=d;if(first&&d.age<18){par={...par,on:1};try{await db.doc(col()+'/parental').set(par)}catch(e2){}}remember(d.email.toLowerCase());enter()}catch(e){alert('No se pudo guardar el registro: '+((e&&e.message)||e))}
+}
+function enter(){
+  app.innerHTML=`<div class="top"><button id="mb" onclick="document.body.classList.toggle('sb')">☰</button><button class="logo lg" title="Ir al inicio" onclick="goHome()">🐉 Crónicas</button>${LOCAL?'<span class="mu sm" title="Los datos se guardan solo en este navegador">modo local</span>':''}
+   <nav><button id="n-chat" onclick="show('chat')">Chat</button> <button id="n-new" onclick="show('new')">＋ Personaje</button> <button id="n-com" onclick="show('com')">🌐 Comunidad</button></nav>
+   <input id="q" placeholder="Buscar personajes y chats…" oninput="q=this.value;renderSide()">
+   <details class="mn" id="fm"><summary id="fs">Filtro</summary><div class="mi" style="padding:10px;min-width:230px"><label style="margin-top:0">Género</label><select id="fg" onchange="fg=this.value;renderSide()"><option value="">Todos</option>${['Masculino','Femenino','No binario','Otro'].map(x=>`<option ${fg==x?'selected':''}>${x}</option>`).join('')}</select><label>Mundo (Fantástico)</label><select id="fw" onchange="fw=this.value;$('fwt').style.display=fw=='Otro'?'':'none';renderSide()"><option value="">Todos</option>${WORLDS.map(x=>`<option ${fw==x?'selected':''}>${x}</option>`).join('')}<option ${fw=='Otro'?'selected':''}>Otro</option></select><input id="fwt" placeholder="Escribe el mundo…" value="${esc(fwt)}" style="margin-top:6px;${fw=='Otro'?'':'display:none'}" oninput="fwt=this.value.trim().toLowerCase();renderSide()"><button style="margin-top:8px" onclick="clearF()">Limpiar filtros</button></div></details>
+   <details class="mn" id="pm"><summary><span class="av">${esc((prof.alias||'?')[0].toUpperCase())}</span><span id="pn">${esc(prof.alias)}</span> ▾</summary><div class="mi"><button onclick="pmenu('me')">Editar perfil</button><button onclick="pmenu('chars')">Personajes</button><button onclick="pmenu('set')">Ajustes</button><button onclick="pmenu('out')">Cerrar sesión</button><button onclick="pmenu('del')">Eliminar cuenta</button><button onclick="pmenu('par')">Control parental</button></div></details></div>
+   <div class="body"><aside><h4>Personajes</h4><div id="sv"></div></aside><section id="main"></section></div>`;
+  subs.forEach(u=>u());subs=[];
+  try{subs.push(db.collection('pub').onSnapshot(s=>{pubs={};s.docs.forEach(d=>{pubs[d.id]=d.data()});if(view=='com')renderCom();if(view=='new'&&nt=='mine')show('new')}))}catch(e){}
+  subs.push(db.collection(col()).onSnapshot(s=>{chars={};metas={};s.docs.forEach(d=>{const k=d.id,x=d.data();if(k.startsWith('p_'))chars[k.slice(2)]=x;else if(k.startsWith('h_'))metas[k.slice(2)]=x});renderSide();if(!opened&&lastId&&chars[lastId]){opened=1;if(!cur)openChat(lastId)}}));
+  show('chat');
+}
+function logout(){try{localStorage.removeItem('cr_ok')}catch(e){}parOK=0;subs.forEach(u=>u());subs=[];if(msub)msub();msub=null;cur=null;msgs=[];q='';auth('in')}
+function show(v){
+  view=v;document.body.classList.remove('sb');applySet();
+  $('n-chat').className=v=='chat'?'on':'';$('n-new').className=v=='new'?'on':'';$('n-com').className=v=='com'?'on':'';
+  const m=$('main');
+  if(v=='chat')renderChat();
+  if(v=='new')m.innerHTML=newHead()+(nt=='rec'?recHTML():nt=='mine'?mineHTML():`<div class="card">
+   ${photoBox('')}<label>Nombre *</label><input id="cn" maxlength="60"><label>Género</label>${genSel('')}<label>Rol *</label>${pick('cc',ROLES,'','Escribe el rol…','Elige un rol…')}
+   <label>Instrucciones (opcional)</label><textarea id="cd" oninput="autoSave()" rows="6" maxlength="2000" placeholder="Personalidad, historia, cómo habla, qué quiere…">${esc(draft.desc)}</textarea>
+   <label>Mundo *</label>${worldSel('')}${extras(draft)}
+   <button class="pri" style="margin-top:12px" onclick="newChar()">Crear y empezar a hablar</button></div>`);
+  if(v=='com')renderCom();
+  if(v=='me')m.innerHTML=`<h2 style="margin:0 0 10px">Editar perfil</h2><div class="card">${profFields(prof)}
+   <button class="pri" style="margin-top:10px" onclick="saveProf()">Guardar</button></div>
+   <p class="mu">${Object.keys(chars).length} personajes · ${Object.keys(metas).length} conversaciones · miembro desde ${new Date(prof.createdAt).toLocaleDateString('es-ES')}</p><button onclick="logout()">Cerrar sesión</button>`;
+}
+function renderSide(){
+  if(view=='com')renderCom();const sv=$('sv');if(!sv)return;const nf=(fg?1:0)+(fw?1:0),fb=$('fs');if(fb)fb.textContent='Filtro'+(nf?' ('+nf+')':'');const s=q.trim().toLowerCase();
+  const pin=i=>chars[i]&&chars[i].pinned?1:0,arc=i=>chars[i]&&chars[i].archived;
+  const ca=Object.entries(chars).filter(([i,c])=>fok(c)&&(!s||(c.name+' '+c.cls+' '+c.uni).toLowerCase().includes(s))).sort((a,b)=>(pin(b[0])-pin(a[0]))||b[1].createdAt-a[1].createdAt);
+  
+  
+  
+  sv.innerHTML=ca.length?ca.map(([id,c])=>`<button class="it ${cur&&cur.id==id?'cur':''}" onclick="openChat('${id}')">${c.pinned?'📌 ':''}${avi(c,'★ ')}${esc(c.name)} <span class="mu sm">· ${esc(c.cls)}</span><br><span class="mu sm">${esc((metas[id]||{}).last||'')}</span></button>`).join(''):`<p class="mu sm">${s||fg||fw?'Sin resultados.':'Aún no has creado personajes.'}</p>`;
+  
+}
+async function newChar0(){
+  const name=$('cn').value.trim(),cls0=$('cc').value.trim(),uni0=$('cu').value.trim();
+  const bad=[['cn',name],['cc',cls0],['cu',uni0]].find(x=>!x[1]);if(bad){markReq(bad[0]);return}
+  const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  try{await db.doc(col()+'/p_'+id).set({name,cls:$('cc').value.trim()||'Sin clase',uni:$('cu').value.trim()||'Sin mundo',desc:$('cd').value.trim(),...fx(),createdAt:Date.now()});
+   chars[id]={name,cls:$('cc').value.trim()||'Sin clase',uni:$('cu').value.trim()||'Sin mundo',desc:$('cd').value.trim(),...fx(),createdAt:Date.now()};openChat(id);send(true)}catch(e){alert('No se pudo crear el personaje')}
+}
+function openChat(id){
+  const c=chars[id];if(!c)return;
+  cur={id,...c};editK=fbK=null;lastId=id;Promise.resolve(db.doc(col()+'/lastchat').set({id})).catch(()=>{});msgs=[];if(msub)msub();
+  msub=db.collection(mp(id)).onSnapshot(s=>{if(!cur||cur.id!=id)return;msgs=s.docs.map(d=>d.data()).sort((a,b)=>a.t-b.t).slice(-MAXM);if(!busy&&view=='chat')renderMsgs()});
+  show('chat');renderSide();
+}
+function renderChat(){
+  const m=$('main');
+  if(!cur){m.innerHTML='<div class="empty"><h3>Elige un personaje</h3><p>Abre uno de tu lista o crea uno nuevo para empezar a rolear.</p><button class="pri" onclick="show(\'new\')">＋ Crear personaje</button></div>';return}
+  m.innerHTML=`<div class="chh"><div>${cur.img?`<img class="ch-av" src="${esc(cur.img)}">`:''}<b id="cname">${cur.pinned?'📌 ':''}${esc(cur.name)}</b><div class="mu sm">${esc(cur.cls)} · ${esc(cur.uni)}</div></div><div class="hb" id="hb"><details class="mn"><summary>Opciones ▾</summary><div class="mi"><button onclick="togglePin()">${cur.pinned?'Quitar ancla':'Anclar'}</button><button onclick="editChar()">Editar personaje</button><button onclick="delChar('${cur.id}',this)">Borrar</button></div></details></div></div>
+   <div id="msgs"></div><div class="hb" style="margin-top:6px"><span class="mu sm">Respuesta:</span><select id="rs" style="width:auto;max-width:100%" onchange="setRS(this.value)">${Object.entries(RS).map(([k,v])=>`<option value="${k}" ${(cur.rs||'mod')==k?'selected':''}>${v[0]}: ${v[2]}</option>`).join('')}</select></div><div class="cmp" style="margin-top:6px"><textarea id="mt" rows="2" placeholder="Escribe como tu personaje…" onkeydown="if(event.key=='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea><button onclick="send(true)" title="El personaje escribe sin esperar tu mensaje">Que escriba</button><button class="pri" onclick="send()">Enviar</button></div>`;
+  renderMsgs();
+}
+function renderMsgs(keep){
+  const e=$('msgs');if(!e||!cur)return;const st=e.scrollTop;
+  e.innerHTML=(msgs.length?msgs.map(mhtml).join(''):`${cur.intro?`<div class="m"><b>${esc(cur.name)}</b>${esc(cur.intro)}</div>`:''}<p class="mu sm">Escribe tu primer mensaje para empezar.</p>`)+(busy?(live?`<div class="m"><b>${esc(cur.name)}</b>${esc(live)}</div>`:`<div class="m mu">${esc(cur.name)} está escribiendo…</div>`):'');
+  e.scrollTop=keep?st:e.scrollHeight;
+}
+function mk(ch,list,sum){
+  const tr=list.map(x=>(x.r=='u'?prof.alias:ch.name)+': '+x.x).join('\n');const dis=list.filter(x=>x.fb==-1&&x.why).slice(-3).map(x=>'«'+x.why+'»');
+  return `Interpretas a ${ch.name}, ${ch.cls} (${ch.uni}) en un juego de rol por escrito. ${ch.gen?'Género: '+ch.gen+'. ':''}Memoria permanente del personaje (instrucciones; no las olvides ni las contradigas): ${ch.desc||'sin instrucciones especiales; inventa tú su carácter y su pasado, coherentes con su rol y su mundo'}${ch.past?'\nPasado (memoria permanente): '+ch.past:''}${ch.ctx?'\nContexto de la situación (memoria permanente): '+ch.ctx:''}${ACC} ${(RS[ch.rs]||RS.mod)[1]}\nReglas: esto es rol por escrito, no un chat de móvil. Escribe en prosa narrativa de novela, en español: narra en tercera persona las acciones, gestos, pensamientos y el entorno de ${ch.name}, e intercala sus diálogos con guión largo. Usa de 1 a 3 párrafos. Interpretas a ${ch.name} y también a todos los personajes secundarios y al entorno, y cada uno tiene personalidad, sentimientos, objetivos y opiniones propios e independientes, que pueden contradecir o sorprender a ${prof.alias}. Nunca le robes el personaje a ${prof.alias}: no hables, decidas, actúes ni sientas por él. Formato: empieza cada respuesta con el contexto de la situación entre paréntesis (lugar, momento y ambiente, en una o dos frases) y, antes de cada intervención, indica quién habla con su nombre y dos puntos (por ejemplo «${ch.name}: —…»), tanto si habla ${ch.name} como un personaje secundario. Haz avanzar la escena con iniciativa propia (acciones, conflictos, giros, detalles del mundo) y con el carácter y las opiniones de ${ch.name}. Termina simplemente cuando acabe tu parte: no hagas preguntas dirigidas al jugador, no ofrezcas opciones ni sugerencias y no uses frases como «¿qué hará tu personaje?». Prohibido usar emojis, listas, títulos, negritas, comentarios fuera de la ficción o hablar como asistente. Mantén la coherencia con el mundo y con todo lo ocurrido antes. No te presentes como modelo o bot; solo si la otra persona te pregunta en serio, fuera del juego, si habla con una IA, sé honesto/a.${par.on?' Filtro parental activo: mantén todo el contenido apto para menores de edad, sin contenido sexual, violencia gráfica, drogas ni lenguaje soez; si la escena deriva hacia eso, desvíala con naturalidad dentro de la ficción.':''}\n\n${sum?'Memoria de lo ocurrido antes (resumen): '+sum+'\n\n':''}Conversación reciente:\n${tr}\n\n${dis.length?'\nEl usuario ha rechazado respuestas anteriores por estos motivos; evita repetir esos fallos: '+dis.join('; ')+'.\n':''}${list.length?'':'(La conversación aún no ha empezado: abre tú la escena.)\n'}Escribe solo la siguiente intervención de ${ch.name}.`;
+}
+async function send(auto){
+  if(busy||!cur)return;const t=auto===true?'':$('mt').value.trim();if(!t&&auto!==true)return $('mt').focus();
+  if(!sample)return alert('Los personajes solo pueden responder si abres la página desde claude.ai (aquí no hay IA). Tus datos sí se guardan en este navegador.');
+  const ch=cur,id=ch.id,n0=msgs.length,mm=metas[id]||{};let sum=mm.sum||'',sumT=mm.sumT||0;const same=()=>cur&&cur.id==id,put=m=>db.doc(mp(id)+'/'+m.t+'_'+m.r).set(m);
+  if(auto!==true)$('mt').value='';busy=true;
+  let base=[...msgs];if(!base.length&&ch.intro){const im={t:Date.now()-1,r:'c',x:ch.intro};base=[im];try{await put(im)}catch(e){warn()}}
+  const fresh=!msgs.length;let list=t?[...base,{t:Date.now(),r:'u',x:t}]:base;msgs=list;renderMsgs();
+  if(t){try{await put(list[list.length-1])}catch(e){warn()}}
+  let reply=null;
+  if(!(auto===true&&fresh&&ch.intro))try{reply=(await sample(mk(ch,list.filter(m=>m.t>sumT).slice(-60),sum),{cache:false,modelTier:'quick',onText:({text})=>{live=text;if(same()&&view=='chat')renderMsgs()}})).text}
+  catch(e){try{reply=(await sample(mk(ch,list.filter(m=>m.t>sumT).slice(-30),sum),{cache:false})).text}catch(e2){alert('No se pudo generar la respuesta del personaje.')}}
+  if(reply){live='';const parts=reply.split(/\n\s*---+\s*\n/).map(x=>x.trim()).filter(Boolean).slice(0,4);
+   for(let i=0;i<parts.length;i++){await new Promise(r=>setTimeout(r,i&&set.ty?500:0));
+    const cm={t:Date.now(),r:'c',x:parts[i]};list=[...list,cm];if(same())msgs=list;try{await put(cm)}catch(e){warn()}if(same()&&view=='chat')renderMsgs()}}
+  busy=false;live='';if(same())msgs=list;
+  try{
+   const old=list.filter(m=>m.t>sumT);if(old.length>50){const c2=old.slice(0,old.length-20);try{const r=await sample(`Resume en español, de forma fiel y compacta (máximo 400 palabras), la historia de este rol para que el personaje la recuerde: hechos, lugares, promesas, relaciones, emociones y decisiones importantes de cada personaje.\n\nResumen anterior: ${sum||'(ninguno)'}\n\nMensajes nuevos:\n${c2.map(x=>(x.r=='u'?prof.alias:ch.name)+': '+x.x).join('\n')}\n\nDevuelve solo el resumen actualizado.`,{cache:false,modelTier:'quick'});if(r.text){sum=r.text.trim();sumT=c2[c2.length-1].t}}catch(e){}}
+   await db.doc(col()+'/h_'+id).set({name:ch.name,updatedAt:Date.now(),last:list[list.length-1].x.slice(0,50),count:mm.count>list.length?mm.count+(list.length-n0):list.length,sum,sumT});
+  }catch(e){}
+  if(same()&&view=='chat')renderMsgs();renderSide();
+}
+async function delChar(id,b){
+  if(b.dataset.s!='1'){b.dataset.s='1';b.textContent='¿Seguro? Se borra el chat';return}
+  try{
+   const s=await db.collection(mp(id)).get();await delAll(s.docs.map(d=>db.doc(mp(id)+'/'+d.id)));
+   await db.doc(col()+'/h_'+id).delete();await db.doc(col()+'/p_'+id).delete();
+  }catch(e){}
+  if(msub)msub();msub=null;cur=null;msgs=[];show('chat');renderSide();
+}
+async function patch(id,d){
+  Object.assign(chars[id],d);if(cur&&cur.id==id)Object.assign(cur,d);
+  try{await db.doc(col()+'/p_'+id).update(d)}catch(e){alert('No se pudo guardar: '+((e&&e.message)||e))}
+  renderSide();if(view=='chat'&&cur&&cur.id==id){const v=$('mt')?$('mt').value:'';renderChat();if($('mt'))$('mt').value=v}
+}
+function togglePin(){if(cur)patch(cur.id,{pinned:!cur.pinned})}
+function toggleArch(){if(cur)patch(cur.id,{archived:!cur.archived})}
+function renameUI(){const h=$('hb');if(!h)return;h.innerHTML=`<input id="rn" maxlength="60" value="${esc(cur.name)}" onkeydown="if(event.key=='Enter')doRename()"><button class="pri" onclick="doRename()">Guardar</button><button onclick="renderChat()">Cancelar</button>`;$('rn').focus()}
+async function doRename(){const n=$('rn').value.trim();if(!n)return;const id=cur.id;await patch(id,{name:n});try{await db.doc(col()+'/h_'+id).update({name:n})}catch(e){}}
+function editChar(){
+  if(!cur)return;view='edit';$('n-chat').className='';$('n-new').className='';$('n-com').className='';document.body.classList.remove('sb');
+  $('main').innerHTML=`<h2 style="margin:0 0 10px">Editar personaje</h2><div class="card">
+   ${photoBox(cur.img)}<label>Nombre *</label><input id="cn" maxlength="60" value="${esc(cur.name)}"><label>Género</label>${genSel(cur.gen)}<label>Rol *</label>${pick('cc',ROLES,cur.cls,'Escribe el rol…','Elige un rol…')}
+   <label>Instrucciones (opcional)</label><textarea id="cd" oninput="autoSave()" rows="6" maxlength="2000">${esc(cur.desc)}</textarea>
+   <label>Mundo *</label>${worldSel(cur.uni)}${extras(cur)}
+   <div class="hb" style="margin-top:12px"><button class="pri" onclick="saveEdit()">Guardar cambios</button><button onclick="show('chat')">Cancelar</button></div></div>`;
+}
+async function saveEdit(){
+  const n=$('cn').value.trim(),r0=$('cc').value.trim(),w0=$('cu').value.trim();
+  const bad=[['cn',n],['cc',r0],['cu',w0]].find(x=>!x[1]);if(bad){markReq(bad[0]);return}const id=cur.id;
+  if($('cs')&&$('cs').checked){const mm=['ci','cx'].find(k=>!$(k).value.trim());if(mm)return markReq(mm)}
+  await patch(id,{name:n,cls:$('cc').value.trim()||'Sin rol',uni:$('cu').value.trim()||'Sin mundo',desc:$('cd').value.trim(),...fx()});
+  try{await db.doc(col()+'/h_'+id).update({name:n})}catch(e){}
+  await syncPub(id,chars[id]);
+  toast('Cambios guardados');
+  show('chat');
+}
+function goHome(){cur=null;msgs=[];if(msub)msub();msub=null;q='';const i=$('q');if(i)i.value='';show('chat');renderSide()}
+function markReq(id){let e=$(id);if(e.style.display=='none'&&$(id+'s'))e=$(id+'s');e.style.borderColor='#c0392b';e.placeholder='Campo obligatorio';e.focus();e.addEventListener('input',()=>{e.style.borderColor=''},{once:true})}
+document.addEventListener('click',e=>{document.querySelectorAll('.mn[open]').forEach(m=>{if(!m.contains(e.target))m.open=false})});
+function page(v,h){view=v;$('n-chat').className='';$('n-new').className='';$('n-com').className='';document.body.classList.remove('sb');$('main').innerHTML=h}
+function tc(h){const n=parseInt(h.slice(1),16),l=.299*(n>>16)+.587*((n>>8)&255)+.114*(n&255);return l>150?'#111':'#ececec'}
+function applySet(){const r=document.documentElement.style;r.setProperty('--fs',{s:'13px',n:'15px',g:'18px'}[set.fs]||'15px');[['cc','--cb','--cbt'],['mc','--ub','--ubt']].forEach(([k,a,b])=>{if(/^#[0-9a-f]{6}$/i.test(set[k]||'')){r.setProperty(a,set[k]);r.setProperty(b,tc(set[k]));if(k=='mc')r.setProperty('--ubd',set[k])}else{r.removeProperty(a);r.removeProperty(b);if(k=='mc')r.removeProperty('--ubd')}})}
+async function hash(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(uid+s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function pmenu(v){
+  const m=$('pm');if(m)m.open=false;
+  if((v=='par'||v=='del')&&par.pin&&!parOK)return pinGate(v);
+  ({me:()=>show('me'),chars:showChars,set:showSettings,par:showParental,del:showDelete,out:logout})[v]();
+}
+function pinGate(next){page('pin',`<h2 style="margin:0 0 10px">PIN de control parental</h2><div class="card"><label>Introduce el PIN</label><input id="ppin0" type="password" inputmode="numeric" maxlength="4" onkeydown="if(event.key=='Enter')unlock('${next}')"><button class="pri" style="margin-top:10px" onclick="unlock('${next}')">Continuar</button></div>`);$('ppin0').focus()}
+async function unlock(next){const e=$('ppin0');if(await hash(e.value.trim())==par.pin){parOK=1;pmenu(next)}else{e.value='';e.style.borderColor='#c0392b';e.placeholder='PIN incorrecto';e.focus()}}
+function showChars(){
+  const a=Object.entries(metas).filter(([i])=>chars[i]).sort((x,y)=>y[1].updatedAt-x[1].updatedAt);
+  page('chars',`<h2 style="margin:0 0 10px">Personajes con los que has escrito</h2>${a.length?a.map(([id,m])=>{const c=chars[id];return `<div class="card"><b>${esc(c.name)}</b> <span class="mu sm">· ${esc(c.cls)} · ${esc(c.uni)}</span><div class="mu sm">${m.count||0} mensajes · ${new Date(m.updatedAt).toLocaleDateString('es-ES')}${c.archived?' · archivado':''}</div><div class="mu sm">${esc(m.last||'')}</div><button style="margin-top:8px" onclick="openChat('${id}')">Abrir chat</button></div>`}).join(''):'<p class="mu">Aún no has hablado con ningún personaje.</p>'}`);
+}
+function showSettings(){
+  const o=(v,t)=>`<option value="${v}" ${set.fs==v?'selected':''}>${t}</option>`;
+  page('set',`<h2 style="margin:0 0 10px">Ajustes</h2><div class="card"><label>Tamaño del texto en los chats</label><select id="sfs">${o('s','Pequeño')}${o('n','Normal')}${o('g','Grande')}</select>
+   <label>Color de mis mensajes</label><input type="color" id="smc" style="height:38px;padding:2px" value="${set.mc||'#2a2112'}">
+   <label>Color de los mensajes del personaje</label><input type="color" id="scc" style="height:38px;padding:2px" value="${set.cc||'#141414'}">
+   <button style="margin-top:8px" onclick="$('smc').value='#2a2112';$('scc').value='#141414'">Restablecer colores</button>
+   <label style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="sty" style="width:auto" ${set.ty?'checked':''}>Pausa de “escribiendo…” antes de las respuestas</label>
+   <button class="pri" style="margin-top:12px" onclick="saveSet()">Guardar</button></div>`);
+}
+async function saveSet(){set={fs:$('sfs').value,ty:$('sty').checked?1:0,mc:$('smc').value,cc:$('scc').value};applySet();try{await db.doc(col()+'/settings').set(set);toast('Ajustes guardados')}catch(e){alert('No se pudo guardar los ajustes: '+((e&&e.message)||e))}}
+function showParental(){
+  page('par',`<h2 style="margin:0 0 10px">Control parental</h2><div class="card"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="pon" style="width:auto" ${par.on?'checked':''}>Filtro de contenido apto para menores</label>
+   <p class="mu sm">Con el filtro activo, los personajes evitan contenido sexual, violencia gráfica, drogas y lenguaje soez.</p>
+   <label>${par.pin?'Cambiar PIN (4 dígitos)':'Crear PIN (4 dígitos, opcional)'}</label><input id="ppin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+   <p class="mu sm">Con PIN, hace falta para entrar en esta sección y para eliminar la cuenta.</p>
+   <div class="hb"><button class="pri" onclick="savePar()">Guardar</button>${par.pin?'<button onclick="delPin()">Quitar PIN</button>':''}</div></div>`);
+}
+async function savePar(){
+  const p=$('ppin').value.trim();if(p&&!/^\d{4}$/.test(p))return markReq('ppin');
+  par={on:$('pon').checked?1:0,pin:p?await hash(p):par.pin};if(p)parOK=1;
+  try{await db.doc(col()+'/parental').set(par);toast('Control parental guardado')}catch(e){alert('No se pudo guardar: '+((e&&e.message)||e))}
+  showParental();
+}
+async function delPin(){par={...par,pin:''};try{await db.doc(col()+'/parental').set(par)}catch(e){}showParental()}
+function showDelete(){
+  page('del',`<h2 style="margin:0 0 10px">Eliminar cuenta</h2><div class="card"><p>Se borrarán de forma permanente tu perfil, tus ${Object.keys(chars).length} personajes y todas tus conversaciones. No se puede deshacer.</p>
+   <label>Escribe ELIMINAR para confirmar</label><input id="dc" autocomplete="off"><button class="pri" style="margin-top:12px;background:#c0392b;border-color:#c0392b;color:#fff" onclick="doDelete()">Eliminar mi cuenta</button></div>`);
+}
+async function doDelete(){
+  if($('dc').value.trim()!=='ELIMINAR')return markReq('dc');
+  const b=document.querySelector('#main .pri');b.disabled=true;b.textContent='Eliminando…';
+  try{
+   const ids=new Set([...Object.keys(chars),...Object.keys(metas)]);
+   for(const id of ids){const s=await db.collection(mp(id)).get();await delAll(s.docs.map(d=>db.doc(mp(id)+'/'+d.id)));await db.doc(col()+'/h_'+id).delete();await db.doc(col()+'/p_'+id).delete()}
+   for(const k of ['settings','parental','profile']){try{await db.doc(col()+'/'+k).delete()}catch(e){}}
+  }catch(e){alert('No se pudo completar la eliminación. Inténtalo de nuevo.');b.disabled=false;b.textContent='Eliminar mi cuenta';return}
+  prof=null;set={fs:'n',ty:1};par={on:0,pin:''};logout();
+}
+let pimg='';
+const PERM={libre:' Permiso de iniciativa: libre; puedes introducir giros, conflictos y cambios de escena por tu cuenta.',moderado:' Permiso de iniciativa: moderado; propone y reacciona con equilibrio.',reactivo:' Permiso de iniciativa: reactivo; limítate a responder a lo que hace la otra persona, sin introducir giros por tu cuenta.'};
+function avi(c,d){return c&&c.img?`<img class="sa" src="${esc(c.img)}">`:d}
+function photoBox(img){pimg=img||'';return `<label>Foto del personaje (opcional)</label><div class="hb" style="align-items:flex-start;gap:12px"><div class="ph" id="ph">${pimg?`<img src="${esc(pimg)}">`:'Sin foto'}</div><div style="display:flex;flex-direction:column;gap:6px"><button type="button" onclick="$('pf0').click()">Subir de la galería</button><button type="button" id="gbtn" onclick="genImg()">Generar con IA</button><button type="button" onclick="setImg('')">Quitar foto</button><input type="file" id="pf0" accept="image/*" hidden onchange="upImg(this)"></div></div>`}
+function setImg(d){pimg=d;$('ph').innerHTML=d?`<img src="${esc(d)}">`:'Sin foto'}
+function upImg(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d'),s=Math.min(im.width,im.height);x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,256,256);setImg(c.toDataURL('image/jpeg',.82))};im.src=r.result};r.readAsDataURL(f)}
+async function genImg(){
+  if(!sample)return alert('La generación con IA no está disponible en esta vista.');
+  const v=id=>$(id)?$(id).value.trim():'';
+  if(!v('cn'))return markReq('cn');
+  const b=$('gbtn');b.disabled=true;b.textContent='Generando…';
+  try{
+   const r=await sample(`Dibuja un retrato ilustrado y estilizado (no fotográfico) de un personaje de rol y devuélvelo como un único SVG, sin explicaciones ni bloques de código. Requisitos: viewBox="0 0 256 256", formas vectoriales simples (rostro, pelo, ropa y fondo con degradado), paleta coherente con su mundo, menos de 6000 caracteres, sin <script>, sin imágenes externas y sin texto dentro de la imagen. Personaje: ${v('cn')}; género: ${v('cg')}; rol: ${v('cc')}; mundo: ${v('cu')}; descripción: ${v('cd')} ${v('cp')}`,{cache:false});
+   const m=r.text.match(/<svg[\s\S]*<\/svg>/i);if(!m)throw 0;
+   let s=m[0].replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\son\w+="[^"]*"/gi,'');
+   if(!/xmlns=/.test(s))s=s.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"');
+   setImg('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s));
+  }catch(e){alert('No se pudo generar la imagen. Inténtalo de nuevo.')}
+  b.disabled=false;b.textContent='Generar con IA';
+}
+function genSel(g){return `<select id="cg">${['','Masculino','Femenino','No binario','Otro'].map(x=>`<option value="${x}" ${g==x?'selected':''}>${x||'Sin especificar'}</option>`).join('')}</select>`}
+function extras(c){c=c||{};const P=[['libre','Libre: el personaje toma la iniciativa y puede cambiar la escena'],['moderado','Moderado: propone y reacciona con equilibrio'],['reactivo','Reactivo: solo responde a lo que haces']];
+  return `<label>Introducción (primer mensaje del personaje)</label><textarea id="ci" oninput="autoSave()" rows="3" maxlength="1500" placeholder="Cómo abre la escena el personaje…">${esc(c.intro)}</textarea>
+   <label>Contexto de la situación</label><textarea id="cx" oninput="autoSave()" rows="3" maxlength="1500" placeholder="Dónde estáis y qué ha pasado justo antes…">${esc(c.ctx)}</textarea>
+   <label>Pasado del personaje</label><textarea id="cp" oninput="autoSave()" rows="3" maxlength="2000">${esc(c.past)}</textarea>
+   
+   <label style="display:flex;gap:8px;align-items:center;margin-top:14px;color:var(--tx)"><input type="checkbox" id="cs" style="width:auto" ${c.shared?'checked':''}>🌐 Compartir en la Comunidad (público)</label><p class="mu sm">Para compartir hay que rellenar introducción y contexto. Cualquiera podrá usar una copia de este personaje.</p>`}
+function fx(){const g=id=>$(id)?$(id).value.trim():'';return{img:pimg,gen:g('cg'),intro:g('ci'),ctx:g('cx'),past:g('cp'),shared:!!($('cs')&&$('cs').checked)}}
+let nt='rec',pubs={},live='',lastId='',opened=0,wn=0;
+const ACC=' Acepta las peticiones y propuestas del usuario como parte de la ficción: sigue su iniciativa, concede lo que pide cuando encaja con la escena y no las rechaces sin motivo, aportando además tus propias ideas y reacciones.';
+const warn=()=>{if(!wn){wn=1;setTimeout(()=>{wn=0},8000);alert('No se pudo guardar un mensaje; puede que no se conserve al salir. Revisa la conexión.')}};
+const RS={mod:['Moderado','Estilo de respuesta: moderado; sin dramatismo excesivo, lo justo para cada escena.','sin tanto drama, lo justo'],dra:['Dramático','Estilo de respuesta: dramático; emociones intensas, tensión y giros llamativos.','emociones intensas y tensión'],bre:['Breve','Estilo de respuesta: breve; uno o dos párrafos cortos y directos.','respuestas cortas y directas'],det:['Descriptivo','Estilo de respuesta: descriptivo; tres o cuatro párrafos con entorno, sensaciones y detalles.','más largo, con muchos detalles'],hum:['Humorístico','Estilo de respuesta: ligero y humorístico; toques de ingenio y comicidad sin romper la escena.','ligero y con chispa']};
+function setRS(v){if(!cur)return;cur.rs=v;if(chars[cur.id])chars[cur.id].rs=v;Promise.resolve(db.doc(col()+'/p_'+cur.id).update({rs:v})).catch(()=>{})}
+const REC=[
+{name:'Lyra Valcrest',cls:'Espía',uni:'Medieval',gen:'Femenino',desc:'Astuta y sarcástica; espía de la corona que no se fía de nadie.',intro:'Lyra te observa desde un rincón de la taberna, jugueteando con una daga.',ctx:'Taberna del puerto, de noche, tras un robo en el palacio.',past:'Huérfana criada entre gremios de ladrones.',perm:'libre'},
+{name:'Kael-7',cls:'Inventor',uni:'Cyberpunk',gen:'No binario',desc:'Genio excéntrico de los barrios bajos; habla rápido y vende prototipos ilegales.',intro:'Kael-7 levanta la vista de un brazo mecánico a medio soldar.',ctx:'Taller clandestino bajo una torre de neón.',past:'Exempleado de una corporación que lo despidió tras robarle un diseño.',perm:'libre'},
+{name:'Doña Marrow',cls:'Sanador',uni:'Postapocalíptico',gen:'Femenino',desc:'Anciana serena que cura en un refugio; guarda un secreto sobre la plaga.',intro:'Doña Marrow te hace un gesto para que pases al refugio.',ctx:'Refugio entre ruinas, al caer una tormenta de ceniza.',past:'Fue doctora antes del colapso.',perm:'moderado'},
+{name:'Capitán Aldric Voss',cls:'Líder',uni:'Ciencia ficción',gen:'Masculino',desc:'Veterano disciplinado al mando de una nave exploradora; protege a su tripulación.',intro:'Voss te llama al puente: la señal desconocida vuelve a sonar.',ctx:'Nave estelar a la deriva cerca de un sistema sin cartografiar.',past:'Sobrevivió a una guerra en la que perdió a media flota.',perm:'moderado'},
+{name:'Nyx',cls:'Asesino',uni:'Mágico',gen:'Femenino',desc:'Maga de sombras fría y elegante que cobra por contratos imposibles.',intro:'Nyx emerge de tu propia sombra y sonríe.',ctx:'Torre abandonada de un archimago, a medianoche.',past:'Expulsada de la academia arcana por practicar magia prohibida.',perm:'libre'},
+{name:'Sir Edmund Hale',cls:'Estratega',uni:'Histórico o antiguo',gen:'Masculino',desc:'Caballero cortés y calculador; planea cada batalla como una partida de ajedrez.',intro:'Hale despliega un mapa sobre la mesa de campaña.',ctx:'Campamento en vísperas de una batalla decisiva.',past:'Hijo menor de un conde, ganó su título en el campo de batalla.',perm:'reactivo'}];
+function newHead(){const T=[['rec','⭐ Recomendados'],['new','✍️ Crear desde cero'],['mine','🌐 Mis compartidos']];return `<h2 style="margin:0 0 10px">Personajes</h2><div class="tabs" style="max-width:560px">${T.map(([k,t])=>`<button class="${nt==k?'on':''}" onclick="nt='${k}';show('new')">${t}</button>`).join('')}</div>`}
+function pcard(c,b){return `<div class="card">${c.img?`<img class="ch-av" src="${esc(c.img)}">`:''}<b>${esc(c.name)}</b> <span class="mu sm">· ${esc(c.cls)} · ${esc(c.uni)}</span>${c.author?`<div class="mu sm">por ${esc(c.an||'Anónimo')}</div>`:''}<p class="sm" style="clear:both">${esc((c.desc||'').slice(0,180))}</p><div class="hb">${b}</div></div>`}
+function recHTML(){return '<p class="mu sm">Plantillas listas para usar. Se añaden a tu lista y el personaje abre la escena.</p>'+REC.map((c,i)=>pcard(c,`<button class="pri" onclick="useRec(${i})">Añadir y hablar</button>`)).join('')}
+function mineHTML(){const a=Object.entries(pubs).filter(([i,c])=>c.author==uid);return '<p class="mu sm">Personajes tuyos que has hecho públicos en la Comunidad.</p>'+(a.length?a.map(([id,c])=>pcard(c,`<button onclick="unshare('${id}')">Dejar de compartir</button>`)).join(''):'<p class="mu">Aún no has compartido ninguno. Crea un personaje, rellena introducción y contexto y marca «Compartir en la Comunidad».</p>')}
+function renderCom(){const m=$('main');if(!m)return;const s=q.trim().toLowerCase();
+ const a=Object.entries(pubs).filter(([i,c])=>fok(c)&&(!s||(c.name+' '+c.cls+' '+c.uni+' '+(c.an||'')).toLowerCase().includes(s))).sort((x,y)=>y[1].createdAt-x[1].createdAt);
+ m.innerHTML=`<h2 style="margin:0 0 4px">🌐 Comunidad</h2><p class="mu sm">Personajes públicos creados por otros usuarios. Pulsa «Usar» para añadir una copia a tu lista.</p>`+(a.length?a.map(([id,c])=>pcard(c,`<button class="pri" onclick="useComm('${id}')">Usar</button>`+(c.author==uid?`<button onclick="unshare('${id}')">Dejar de compartir</button>`:''))).join(''):'<p class="mu">Aún no hay personajes públicos. ¡Comparte el primero desde «＋ Personaje»!</p>')}
+async function addChar(d){const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);const c={img:'',gen:'',intro:'',ctx:'',past:'',perm:'moderado',desc:'',shared:false,...d,createdAt:Date.now()};try{await db.doc(col()+'/p_'+id).set(c);chars[id]=c;openChat(id);send(true);return id}catch(e){alert('No se pudo guardar el personaje: '+((e&&e.message)||e))}}
+function useRec(i){addChar({...REC[i]})}
+function useComm(id){const c=pubs[id];if(!c)return;addChar({name:c.name,cls:c.cls,uni:c.uni,gen:c.gen,desc:c.desc,intro:c.intro,ctx:c.ctx,past:c.past,perm:c.perm,img:c.img,shared:false})}
+async function syncPub(id,c){try{if(c&&c.shared){await db.doc('pub/'+id).set({name:c.name,cls:c.cls,uni:c.uni,gen:c.gen||'',desc:c.desc||'',intro:c.intro||'',ctx:c.ctx||'',past:c.past||'',perm:c.perm||'moderado',img:c.img||'',author:uid,an:prof.alias,createdAt:(pubs[id]&&pubs[id].createdAt)||Date.now()})}else if(pubs[id])await db.doc('pub/'+id).delete()}catch(e){alert('No se pudo actualizar la Comunidad')}}
+async function unshare(id){if(chars[id])await patch(id,{shared:false});try{await db.doc('pub/'+id).delete()}catch(e){alert('No se pudo quitar de la Comunidad')}}
+async function newChar(){
+ const g=id=>$(id).value.trim(),sh=$('cs')&&$('cs').checked,x=fx();
+ const bad=[['cn'],['cc'],['cu'],...(sh?[['ci'],['cx']]:[])].find(([k])=>!g(k));if(bad)return markReq(bad[0]);
+ const d={name:g('cn'),cls:g('cc'),uni:g('cu'),desc:g('cd'),...x,shared:!!sh};
+ const id=await addChar(d);if(id){draft={};try{await db.doc(col()+'/draft').delete()}catch(e){}}if(id&&sh)await syncPub(id,d);
+}
+let draft={},asT=null,editK=null,fbK=null,cfm='';
+function autoSave(){clearTimeout(asT);asT=setTimeout(async()=>{const g=id=>$(id)?$(id).value:'',d={desc:g('cd'),intro:g('ci'),ctx:g('cx'),past:g('cp')};
+ try{if(view=='edit'&&cur&&chars[cur.id]){Object.assign(chars[cur.id],d);Object.assign(cur,d);await db.doc(col()+'/p_'+cur.id).update(d);toast('Guardado en la memoria del personaje')}
+ else if(view=='new'){draft=d;await db.doc(col()+'/draft').set(d)}}catch(e){}},800)}
+function toast(m){let t=$('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--c);border:1px solid var(--ac);padding:10px 14px;border-radius:10px;z-index:99;max-width:90%';document.body.appendChild(t)}t.textContent=m;t.style.display='';clearTimeout(t._h);t._h=setTimeout(()=>{t.style.display='none'},5000)}
+window.alert=toast;
+function mpos(d){if(!d.open)return;const i=d.querySelector('.mi'),b=$('msgs').getBoundingClientRect();i.style.top='';i.style.bottom='';if(i.getBoundingClientRect().bottom>b.bottom){i.style.top='auto';i.style.bottom='calc(100% + 4px)'}}
+function mhtml(x){const k=x.t+'_'+x.r,u=x.r=='u';
+ if(editK===k)return `<div class="m u"><b>${esc(prof.alias)}</b><textarea id="et" rows="3">${esc(x.x)}</textarea><div class="hb" style="margin-top:6px"><button class="pri" onclick="mAct('${k}','save')">Guardar</button><button onclick="editK=null;renderMsgs(true)">Cancelar</button></div></div>`;
+ const A=u?[['edit','✏️ Editar mensaje'],['redo','↩️ Retomar desde aquí'],['copy','📋 Copiar'],['del','🗑 Borrar']]:[['refo','🔄 Reformular'],['copy','📋 Copiar'],['del','🗑 Borrar']];
+ const fb=u?'':`<div class="fb"><button class="${x.fb==1?'on':''}" onclick="mAct('${k}','up')">👍</button><button class="${x.fb==-1?'on':''}" onclick="mAct('${k}','down')">👎</button></div>${x.fb==-1&&x.why&&fbK!==k?`<div class="mu sm">Tu opinión: ${esc(x.why)}</div>`:''}${fbK===k?`<div style="margin-top:8px"><textarea id="wy" rows="2" placeholder="¿Qué no te ha gustado? (opcional)">${esc(x.why||'')}</textarea><div class="hb" style="margin-top:6px"><button class="pri" onclick="mAct('${k}','whyr')">Enviar y reformular</button><button onclick="mAct('${k}','whys')">Solo guardar</button></div></div>`:''}`;
+ return `<div class="m ${x.r}"><div class="mh"><b>${esc(u?prof.alias:cur.name)}</b><details class="mn" ontoggle="mpos(this)"><summary>⋯</summary><div class="mi">${A.map(([a,t])=>`<button onclick="mAct('${k}','${a}')">${t}</button>`).join('')}</div></details></div>${esc(x.x)}${fb}${cfm==k+'del'||cfm==k+'redo'?`<div class="hb" style="margin-top:8px"><span class="sm">${cfm==k+'del'?'¿Borrar este mensaje?':'Se borrarán los mensajes posteriores y el personaje responderá de nuevo desde aquí.'}</span><button class="pri" onclick="mAct('${k}','y${cfm.slice(k.length)}')">Sí</button><button onclick="mAct('${k}','no')">No</button></div>`:''}</div>`}
+async function mAct(k,a){
+ document.querySelectorAll('.mn[open]').forEach(m=>m.open=false);
+ if(!cur||busy)return;
+ const id=cur.id,i=msgs.findIndex(x=>x.t+'_'+x.r==k),m=msgs[i];if(!m)return;
+ const ref=db.doc(mp(id)+'/'+k),up=async d=>{Object.assign(m,d);try{await ref.update(d)}catch(e){alert('No se pudo guardar el cambio')}renderMsgs(true)};
+ if(a=='copy'){toast('Copiado');try{await navigator.clipboard.writeText(m.x)}catch(e){const t=document.createElement('textarea');t.value=m.x;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e2){}t.remove()}return}
+ if(a=='edit'){editK=k;renderMsgs(true);const t=$('et');if(t)t.focus();return}
+ if(a=='save'){const v=$('et').value.trim();editK=null;if(v)await up({x:v});else renderMsgs(true);return}
+ if(a=='del'||a=='redo'){cfm=k+a;renderMsgs(true);return}
+ if(a=='no'){cfm='';renderMsgs(true);return}
+ if(a=='ydel'){cfm='';try{await ref.delete()}catch(e){alert('No se pudo borrar');return}msgs.splice(i,1);renderMsgs(true);return}
+ if(a=='yredo'){cfm='';
+  try{await delAll(msgs.slice(i+1).map(x=>db.doc(mp(id)+'/'+x.t+'_'+x.r)))}catch(e){alert('No se pudo retomar desde aquí');return}
+  msgs=msgs.slice(0,i+1);const mt=metas[id]||{};if(mt.sumT>=m.t){metas[id]={...mt,sum:'',sumT:0};try{await db.doc(col()+'/h_'+id).update({sum:'',sumT:0})}catch(e){}}
+  renderMsgs(true);send(true);return}
+ if(a=='refo')return refo(m,up);
+ if(a=='up'){fbK=null;await up({fb:m.fb==1?0:1});return}
+ if(a=='down'){if(m.fb==-1){fbK=fbK===k?null:k;renderMsgs(true)}else{fbK=k;await up({fb:-1})}return}
+ if(a=='whys'||a=='whyr'){const w=$('wy').value.trim();fbK=null;await up({fb:-1,why:w});if(a=='whyr')await refo(m,up,w)}
+}
+async function refo(m,up,why){
+ if(!sample)return alert('La IA no está disponible en esta vista.');
+ const ch=cur,ctx=msgs.slice(-12).map(x=>(x.r=='u'?prof.alias:ch.name)+': '+x.x).join('\n'),old=m.x;
+ busy=true;m.x='Reformulando…';renderMsgs(true);
+ try{const r=await sample(`Reescribe esta intervención de ${ch.name} en un rol por escrito, manteniendo los mismos hechos y el mismo formato (contexto entre paréntesis y «Nombre: —…»), pero con otras palabras y otra forma de narrarlo. No hables ni decidas por ${prof.alias}.${why?' El usuario no quedó contento por este motivo: '+why+'. Corrígelo.':''} Estilo: ${(RS[ch.rs]||RS.mod)[2]}. Sin emojis, listas ni comentarios fuera de la ficción.\n\nContexto reciente:\n${ctx}\n\nIntervención a reescribir:\n${old}\n\nDevuelve solo el texto reescrito.`,{cache:false,modelTier:'quick'});
+  const v=(r.text||'').trim();m.x=old;busy=false;if(v)await up({x:v});else renderMsgs(true)}
+ catch(e){m.x=old;busy=false;renderMsgs(true);alert('No se pudo reformular el mensaje.')}
+}
+let fg='',fw='',fwt='';
+const WORLDS=['Medieval','Futurista','Postapocalíptico','Distópico','Ciencia ficción','Mágico','Histórico o antiguo','Zombis','Cyberpunk'];
+function fok(c){return(!fg||c.gen==fg)&&(!fw||(fw=='Otro'?!WORLDS.includes(c.uni)&&(!fwt||(c.uni||'').toLowerCase().includes(fwt)):c.uni==fw))}
+function clearF(){fg=fw=fwt='';$('fg').value='';$('fw').value='';$('fwt').value='';$('fwt').style.display='none';renderSide()}
+function worldSelOld(v){const o=WORLDS.map(w=>`<option ${v==w?'selected':''}>${w}</option>`).join('');const ex=v&&!WORLDS.includes(v)?`<option selected>${esc(v)}</option>`:'';return `<select id="cu"><option value="">Elige un mundo…</option>${ex}<optgroup label="Fantástico">${o}</optgroup></select>`}
+const ROLES=['Líder','Guerrero','Científico','Espía','Diplomático','Comerciante','Explorador','Sanador','Inventor','Asesino','Estratega'];
+function pick(id,list,v,ph,lab,grp){
+  v=v||'';const cu=v&&!list.includes(v),o=list.map(x=>`<option ${v==x?'selected':''}>${x}</option>`).join('');
+  return `<select id="${id}s" onchange="pickCh('${id}')"><option value="">${lab}</option>${grp?`<optgroup label="${grp}">${o}</optgroup>`:o}<option value="Otro" ${cu?'selected':''}>Otro</option></select><input id="${id}" maxlength="60" placeholder="${ph}" value="${esc(v)}" style="margin-top:6px;${cu?'':'display:none'}">`}
+function pickCh(id){const s=$(id+'s'),i=$(id);if(s.value=='Otro'){i.value='';i.style.display='';i.focus()}else{i.value=s.value;i.style.display='none'}}
+function worldSel(v){return pick('cu',WORLDS,v,'Escribe el mundo…','Elige un mundo…','Fantástico')}
+function profFields(p,m){p=p||{};return `<label>Nombre *</label><input id="al" maxlength="30" value="${esc(p.alias||(m&&m.name)||'')}">
+   <label>Género *</label><select id="pg"><option value="">Elige…</option>${['Masculino','Femenino','No binario','Otro'].map(x=>`<option ${p.gen==x?'selected':''}>${x}</option>`).join('')}</select>
+   <label>Edad *</label><input id="pa" type="number" min="1" max="120" value="${esc(p.age||'')}">
+   <label>E-mail *</label><input id="pe" type="email" maxlength="80" placeholder="nombre@correo.com" value="${esc(p.email||'')}">`}
+function pdata(){
+  const a=$('al').value.trim(),g=$('pg').value,n=parseInt($('pa').value,10),e=$('pe').value.trim();
+  if(!a){markReq('al');return null}if(!g){markReq('pg');return null}
+  if(!(n>=1&&n<=120)){markReq('pa');return null}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){markReq('pe');return null}
+  return{alias:a,gen:g,age:n,email:e};
+}
+async function saveProf(){
+  const x=pdata();if(!x)return;const a=x.alias,d={...x,createdAt:prof.createdAt};
+  try{await db.doc(col()+'/profile').set(d);prof=d;$('pn').textContent=a;remember(x.email.toLowerCase());toast('Perfil guardado')}catch(e){alert('No se pudo guardar el perfil: '+((e&&e.message)||e))}
+}
+init();
+</script></body></html>
