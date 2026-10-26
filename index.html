@@ -33,10 +33,11 @@ aside h4{margin:14px 0 6px;color:var(--mu);font-size:12px;text-transform:upperca
 .m{font-size:var(--fs,15px);max-width:85%;margin:8px 0;padding:8px 12px;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--cb,var(--c));color:var(--cbt,inherit)}
 .m.u{margin-left:auto;background:var(--ub,#2a2112);color:var(--ubt,inherit);border:1px solid var(--ubd,#4a3a1c)}
 .m b{display:block;font-size:12px;color:var(--ac)}
-.cmp{display:flex;gap:8px;align-items:flex-end}.cmp textarea{resize:none}.mh{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.m .mn summary{padding:0 8px;border:0;background:none;font-size:18px;line-height:1;opacity:.7}.m .mi{color:var(--tx)}.fb{display:flex;gap:6px;margin-top:6px}.fb button{padding:2px 8px;font-size:13px}.m textarea{width:100%;min-width:220px;color:var(--tx)}
+.cmp{display:flex;gap:8px;align-items:flex-end}.cmp textarea{resize:none}.mh{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.m .mn summary{padding:0 8px;border:0;background:none;font-size:18px;line-height:1;opacity:.7}.m .mi{color:var(--tx)}.sr{display:flex;gap:4px;align-items:flex-start;margin-bottom:5px}.sr .it{flex:1;min-width:0;margin-bottom:0}.sr .mn summary{padding:4px 9px;font-size:16px}.fb{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.fb button.on{background:var(--ac);color:#000;border-color:var(--ac);font-weight:700}.fb button{padding:2px 8px;font-size:13px}.m textarea{width:100%;min-width:220px;color:var(--tx)}
 .card{background:var(--c);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px;max-width:560px}
 #mb{display:none}.hb{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.hb input{width:180px}.sa{width:20px;height:20px;border-radius:5px;object-fit:cover;vertical-align:middle;margin-right:6px}.ph{width:150px;height:150px;flex:none;border:1px dashed var(--bd);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--p);color:var(--mu);font-size:13px}.ph img{width:100%;height:100%;object-fit:cover}.ch-av{float:left;width:40px;height:40px;border-radius:10px;object-fit:cover;margin-right:10px}.mn{position:relative}.mn summary{cursor:pointer;list-style:none;background:var(--c);border:1px solid var(--bd);border-radius:8px;padding:6px 11px}.mn summary::-webkit-details-marker{display:none}.mn[open] .mi{position:absolute;right:0;top:calc(100% + 4px);z-index:6;background:var(--p);border:1px solid var(--bd);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:2px;min-width:180px}.mn .mi button{text-align:left;border:0;background:none}.mn .mi button:hover{background:var(--c)}
 @media(max-width:760px){#mb{display:inline-block}aside{position:absolute;z-index:5;top:0;bottom:0;left:0;transform:translateX(-100%);transition:transform .2s}body.sb aside{transform:none}#pn{display:none}}
+@media(max-width:760px){.top{flex-wrap:wrap;gap:6px}.top nav{order:8;flex:1 1 100%;display:flex;gap:4px}.top nav button{white-space:nowrap;padding:5px 8px;font-size:13px}.top input#q{order:9;flex:1 1 50%;min-width:0}#fm{order:10}#pm{order:3;margin-left:auto}#pm summary,#fm summary{white-space:nowrap}}
 </style></head><body>
 <div id="app"></div>
 <script>
@@ -75,13 +76,37 @@ function wrapDb(d){
   return{doc:p=>wd(d.doc(p)),collection:p=>wc(d.collection(p))};
 }
 async function delAll(refs){for(let i=0;i<refs.length;i+=6)await Promise.all(refs.slice(i,i+6).map(r=>r.delete()))}
+function backupHTML(){return `<div class="card"><b>Copia de seguridad</b><p class="mu sm">Para llevar tus personajes y chats a otro dispositivo: pulsa «Exportar», copia el texto y, en el otro dispositivo, pégalo aquí y pulsa «Importar».</p>
+ <div class="hb"><button onclick="bkExport()">Exportar</button><button onclick="bkCopy()">Copiar</button></div>
+ <textarea id="bk" rows="5" placeholder="Aquí aparece la copia. Para importar, pega aquí el texto." style="margin-top:8px"></textarea>
+ <div class="hb" style="margin-top:8px"><button class="pri" onclick="bkImport()">Importar</button></div></div>`}
+async function bkExport(){
+  const b=$('bk');b.value='Preparando…';
+  try{const out={},s=await db.collection(col()).get();
+   for(const d of s.docs){if(d.id=='probe')continue;out[d.id]=d.data();if(d.id.startsWith('h_')){const id=d.id.slice(2),m=await db.collection(mp(id)).get();out['m/'+id]=m.docs.map(x=>({k:x.id,d:x.data()}))}}
+   b.value=JSON.stringify({app:'cronicas',v:1,docs:out});toast('Copia lista. Pulsa «Copiar».')}
+  catch(e){b.value='';toast('No se pudo exportar la copia.')}
+}
+async function bkCopy(){const b=$('bk');if(!b.value)return;try{await navigator.clipboard.writeText(b.value);toast('Copiado')}catch(e){b.select();try{document.execCommand('copy');toast('Copiado')}catch(e2){toast('Selecciona el texto y cópialo a mano.')}}}
+async function bkImport(){
+  let j;try{j=JSON.parse($('bk').value)}catch(e){return toast('El texto no es una copia válida.')}
+  if(!j||j.app!=='cronicas'||!j.docs)return toast('El texto no es una copia de Crónicas.');
+  const ok=k=>typeof k=='string'&&/^[A-Za-z0-9_\-.~:@+]+$/.test(k);let n=0;
+  try{for(const [k,v] of Object.entries(j.docs)){
+    if(k.startsWith('m/')){const id=k.slice(2);if(!ok(id)||!Array.isArray(v))continue;for(const x of v){if(ok(x.k)&&x.d&&typeof x.d=='object'){await db.doc(mp(id)+'/'+x.k).set(x.d);n++}}}
+    else if(ok(k)&&v&&typeof v=='object'){await db.doc(col()+'/'+k).set(v);n++}}}
+  catch(e){return toast('Importación incompleta: '+((e&&e.message)||e))}
+  try{const a=await db.doc(col()+'/profile').get();if(a.exists)prof=a.data();const b=await db.doc(col()+'/settings').get();if(b.exists)set={...set,...b.data()};const c=await db.doc(col()+'/parental').get();if(c.exists)par={...par,...c.data()}}catch(e){}
+  applySet();toast('Importados '+n+' elementos.');
+}
 async function init(){
   try{db=await claude.use('db');user=await claude.use('user')}catch(e){}
   try{sample=await claude.use('sample')}catch(e){}
   if(db&&user){try{me=await user.me();uid=me.id}catch(e){}}
   if(!uid){LOCAL=true;db=mkLocalDb();me={id:'local',name:''};uid='local';sample=null}
   db=wrapDb(db);
-  if(!LOCAL){try{if((await user.can('data.write'))===false)toast('Tu acceso es de solo lectura: para guardar necesitas permiso de Colaborador. Pídeselo al dueño de la página.')}catch(e){}}
+  if(!LOCAL){let can=true;try{const c=await user.can('data.write');if(c===false)can=false;else if(c===null){try{await db.doc(col()+'/probe').set({t:1});await db.doc(col()+'/probe').delete()}catch(e){if(e&&e.code=='invalid_argument')can=false}}}catch(e){}
+    if(!can){LOCAL=true;db=wrapDb(mkLocalDb());me={id:'local',name:(me&&me.name)||''};uid='local';toast('Aquí no tienes permiso de escritura en la base de datos de claude.ai: tus datos se guardarán en este navegador (modo local).')}}
   try{const s=await db.doc(col()+'/profile').get();prof=s.exists?s.data():null}catch(e){prof=null}
   try{const a=await db.doc(col()+'/settings').get();if(a.exists)set={...set,...a.data()};const b=await db.doc(col()+'/parental').get();if(b.exists)par={...par,...b.data()}}catch(e){}
   try{const l=await db.doc(col()+'/lastchat').get();if(l.exists)lastId=l.data().id}catch(e){}
@@ -102,7 +127,7 @@ function auth(m){
   <div class="tabs"><button class="${m=='in'?'on':''}" onclick="auth('in')">Iniciar sesión</button><button class="${m=='up'?'on':''}" onclick="auth('up')">Registrarte</button></div>
   ${m=='in'?`<label>E-mail</label><input id="le" type="email" maxlength="80" placeholder="nombre@correo.com" value="${esc(savedEmail())}" onkeydown="if(event.key=='Enter')login()"><button class="pri" style="margin-top:12px" onclick="login()">Iniciar sesión</button><p class="mu sm">Usa el e-mail con el que te registraste. Si aún no tienes cuenta, pulsa «Registrarte».</p>`
   :`${profFields(prof,me)}<button class="pri" style="margin-top:12px" onclick="reg()">${prof?'Actualizar y entrar':'Crear cuenta'}</button>`}
-  <p class="mu sm">Tu identidad es tu cuenta de claude.ai; no se guardan contraseñas.</p></div>`;
+  <p class="mu sm">${LOCAL?'Modo local: tus datos se guardan solo en este navegador. Para llevarlos a otro dispositivo usa Ajustes → Copia de seguridad.':'Tu identidad es tu cuenta de claude.ai; no se guardan contraseñas.'}</p></div>`;
 }
 async function reg(){
   const x=pdata();if(!x)return;
@@ -140,11 +165,12 @@ function show(v){
 function renderSide(){
   if(view=='com')renderCom();const sv=$('sv');if(!sv)return;const nf=(fg?1:0)+(fw?1:0),fb=$('fs');if(fb)fb.textContent='Filtro'+(nf?' ('+nf+')':'');const s=q.trim().toLowerCase();
   const pin=i=>chars[i]&&chars[i].pinned?1:0,arc=i=>chars[i]&&chars[i].archived;
-  const ca=Object.entries(chars).filter(([i,c])=>fok(c)&&(!s||(c.name+' '+c.cls+' '+c.uni).toLowerCase().includes(s))).sort((a,b)=>(pin(b[0])-pin(a[0]))||b[1].createdAt-a[1].createdAt);
+  const ca=Object.entries(chars).filter(([i,c])=>!c.archived&&fok(c)&&(!s||(c.name+' '+c.cls+' '+c.uni).toLowerCase().includes(s))).sort((a,b)=>(pin(b[0])-pin(a[0]))||b[1].createdAt-a[1].createdAt);
   
   
   
-  sv.innerHTML=ca.length?ca.map(([id,c])=>`<button class="it ${cur&&cur.id==id?'cur':''}" onclick="openChat('${id}')">${c.pinned?'📌 ':''}${avi(c,'★ ')}${esc(c.name)} <span class="mu sm">· ${esc(c.cls)}</span><br><span class="mu sm">${esc((metas[id]||{}).last||'')}</span></button>`).join(''):`<p class="mu sm">${s||fg||fw?'Sin resultados.':'Aún no has creado personajes.'}</p>`;
+  const ar=Object.entries(chars).filter(([i,c])=>c.archived&&fok(c)&&(!s||(c.name+' '+c.cls+' '+c.uni).toLowerCase().includes(s)));
+  sv.innerHTML=(ca.length?ca.map(([id,c])=>srow(id,c)).join(''):`<p class="mu sm">${s||fg||fw?'Sin resultados.':'Aún no has creado personajes.'}</p>`)+(ar.length?`<details style="margin-top:12px" ${arcOpen?'open':''} ontoggle="arcOpen=this.open"><summary class="mu sm" style="cursor:pointer">Archivados (${ar.length})</summary>${ar.map(([id,c])=>srow(id,c)).join('')}</details>`:'');
   
 }
 async function newChar0(){
@@ -178,14 +204,14 @@ function mk(ch,list,sum){
 }
 async function send(auto){
   if(busy||!cur)return;const t=auto===true?'':$('mt').value.trim();if(!t&&auto!==true)return $('mt').focus();
-  if(!sample)return alert('Los personajes solo pueden responder si abres la página desde claude.ai (aquí no hay IA). Tus datos sí se guardan en este navegador.');
+  if(!sample&&auto!==true)toast('Aquí no hay IA: tu mensaje se guarda, pero el personaje no responderá. Abre la página en claude.ai para que responda.');
   const ch=cur,id=ch.id,n0=msgs.length,mm=metas[id]||{};let sum=mm.sum||'',sumT=mm.sumT||0;const same=()=>cur&&cur.id==id,put=m=>db.doc(mp(id)+'/'+m.t+'_'+m.r).set(m);
   if(auto!==true)$('mt').value='';busy=true;
   let base=[...msgs];if(!base.length&&ch.intro){const im={t:Date.now()-1,r:'c',x:ch.intro};base=[im];try{await put(im)}catch(e){warn()}}
   const fresh=!msgs.length;let list=t?[...base,{t:Date.now(),r:'u',x:t}]:base;msgs=list;renderMsgs();
   if(t){try{await put(list[list.length-1])}catch(e){warn()}}
   let reply=null;
-  if(!(auto===true&&fresh&&ch.intro))try{reply=(await sample(mk(ch,list.filter(m=>m.t>sumT).slice(-60),sum),{cache:false,modelTier:'quick',onText:({text})=>{live=text;if(same()&&view=='chat')renderMsgs()}})).text}
+  if(sample&&!(auto===true&&fresh&&ch.intro))try{reply=(await sample(mk(ch,list.filter(m=>m.t>sumT).slice(-60),sum),{cache:false,modelTier:'quick',onText:({text})=>{live=text;if(same()&&view=='chat')renderMsgs()}})).text}
   catch(e){try{reply=(await sample(mk(ch,list.filter(m=>m.t>sumT).slice(-30),sum),{cache:false})).text}catch(e2){alert('No se pudo generar la respuesta del personaje.')}}
   if(reply){live='';const parts=reply.split(/\n\s*---+\s*\n/).map(x=>x.trim()).filter(Boolean).slice(0,4);
    for(let i=0;i<parts.length;i++){await new Promise(r=>setTimeout(r,i&&set.ty?500:0));
@@ -197,6 +223,15 @@ async function send(auto){
   }catch(e){}
   if(same()&&view=='chat')renderMsgs();renderSide();
 }
+let arcOpen=false;
+function srow(id,c){return `<div class="sr"><button class="it ${cur&&cur.id==id?'cur':''}" onclick="openChat('${id}')">${c.pinned?'📌 ':''}${avi(c,'★ ')}${esc(c.name)} <span class="mu sm">· ${esc(c.cls)}</span><br><span class="mu sm">${esc((metas[id]||{}).last||'')}</span></button><details class="mn"><summary title="Opciones del personaje">⋯</summary><div class="mi"><button onclick="rowAct('${id}','pin')">${c.pinned?'Quitar ancla':'Anclar'}</button><button onclick="rowAct('${id}','edit')">Editar personaje</button><button onclick="rowAct('${id}','arch')">${c.archived?'Desarchivar':'Archivar'}</button><button onclick="rowAct('${id}','del',this)">Borrar</button></div></details></div>`}
+async function rowAct(id,a,b){
+  if(!chars[id])return;
+  if(a=='pin')return patch(id,{pinned:!chars[id].pinned});
+  if(a=='arch')return patch(id,{archived:!chars[id].archived});
+  if(a=='edit'){openChat(id);return editChar()}
+  if(a=='del')return delChar(id,b);
+}
 async function delChar(id,b){
   if(b.dataset.s!='1'){b.dataset.s='1';b.textContent='¿Seguro? Se borra el chat';return}
   try{
@@ -206,9 +241,12 @@ async function delChar(id,b){
   if(msub)msub();msub=null;cur=null;msgs=[];show('chat');renderSide();
 }
 async function patch(id,d){
+  const old={};Object.keys(d).forEach(k=>{old[k]=chars[id][k]});
   Object.assign(chars[id],d);if(cur&&cur.id==id)Object.assign(cur,d);
-  try{await db.doc(col()+'/p_'+id).update(d)}catch(e){alert('No se pudo guardar: '+((e&&e.message)||e))}
+  let ok=true;
+  try{await db.doc(col()+'/p_'+id).update(d)}catch(e){ok=false;Object.assign(chars[id],old);if(cur&&cur.id==id)Object.assign(cur,old);alert('No se pudo guardar: '+((e&&e.message)||e))}
   renderSide();if(view=='chat'&&cur&&cur.id==id){const v=$('mt')?$('mt').value:'';renderChat();if($('mt'))$('mt').value=v}
+  return ok;
 }
 function togglePin(){if(cur)patch(cur.id,{pinned:!cur.pinned})}
 function toggleArch(){if(cur)patch(cur.id,{archived:!cur.archived})}
@@ -226,9 +264,11 @@ async function saveEdit(){
   const n=$('cn').value.trim(),r0=$('cc').value.trim(),w0=$('cu').value.trim();
   const bad=[['cn',n],['cc',r0],['cu',w0]].find(x=>!x[1]);if(bad){markReq(bad[0]);return}const id=cur.id;
   if($('cs')&&$('cs').checked){const mm=['ci','cx'].find(k=>!$(k).value.trim());if(mm)return markReq(mm)}
-  await patch(id,{name:n,cls:$('cc').value.trim()||'Sin rol',uni:$('cu').value.trim()||'Sin mundo',desc:$('cd').value.trim(),...fx()});
+  const okp=await patch(id,{name:n,cls:$('cc').value.trim()||'Sin rol',uni:$('cu').value.trim()||'Sin mundo',desc:$('cd').value.trim(),...fx()});if(!okp)return;
   try{await db.doc(col()+'/h_'+id).update({name:n})}catch(e){}
   await syncPub(id,chars[id]);
+  let ok2=false;try{const v=await db.doc(col()+'/p_'+id).get();ok2=v.exists&&v.data().name===n&&(v.data().desc||'')===$('cd').value.trim()}catch(e){}
+  if(!ok2)return toast('No se pudo confirmar el guardado. Inténtalo de nuevo; no pierdes lo que has escrito.');
   toast('Cambios guardados');
   show('chat');
 }
@@ -257,7 +297,7 @@ function showSettings(){
    <label>Color de los mensajes del personaje</label><input type="color" id="scc" style="height:38px;padding:2px" value="${set.cc||'#141414'}">
    <button style="margin-top:8px" onclick="$('smc').value='#2a2112';$('scc').value='#141414'">Restablecer colores</button>
    <label style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="sty" style="width:auto" ${set.ty?'checked':''}>Pausa de “escribiendo…” antes de las respuestas</label>
-   <button class="pri" style="margin-top:12px" onclick="saveSet()">Guardar</button></div>`);
+   <button class="pri" style="margin-top:12px" onclick="saveSet()">Guardar</button></div>${backupHTML()}`);
 }
 async function saveSet(){set={fs:$('sfs').value,ty:$('sty').checked?1:0,mc:$('smc').value,cc:$('scc').value};applySet();try{await db.doc(col()+'/settings').set(set);toast('Ajustes guardados')}catch(e){alert('No se pudo guardar los ajustes: '+((e&&e.message)||e))}}
 function showParental(){
@@ -356,11 +396,11 @@ function mpos(d){if(!d.open)return;const i=d.querySelector('.mi'),b=$('msgs').ge
 function mhtml(x){const k=x.t+'_'+x.r,u=x.r=='u';
  if(editK===k)return `<div class="m u"><b>${esc(prof.alias)}</b><textarea id="et" rows="3">${esc(x.x)}</textarea><div class="hb" style="margin-top:6px"><button class="pri" onclick="mAct('${k}','save')">Guardar</button><button onclick="editK=null;renderMsgs(true)">Cancelar</button></div></div>`;
  const A=u?[['edit','✏️ Editar mensaje'],['redo','↩️ Retomar desde aquí'],['copy','📋 Copiar'],['del','🗑 Borrar']]:[['refo','🔄 Reformular'],['copy','📋 Copiar'],['del','🗑 Borrar']];
- const fb=u?'':`<div class="fb"><button class="${x.fb==1?'on':''}" onclick="mAct('${k}','up')">👍</button><button class="${x.fb==-1?'on':''}" onclick="mAct('${k}','down')">👎</button></div>${x.fb==-1&&x.why&&fbK!==k?`<div class="mu sm">Tu opinión: ${esc(x.why)}</div>`:''}${fbK===k?`<div style="margin-top:8px"><textarea id="wy" rows="2" placeholder="¿Qué no te ha gustado? (opcional)">${esc(x.why||'')}</textarea><div class="hb" style="margin-top:6px"><button class="pri" onclick="mAct('${k}','whyr')">Enviar y reformular</button><button onclick="mAct('${k}','whys')">Solo guardar</button></div></div>`:''}`;
+ const fb=u?'':`<div class="fb"><button class="${x.fb==1?'on':''}" title="Me gusta" onclick="mAct('${k}','up')">👍${x.fb==1?' Me gusta ✓':''}</button><button class="${x.fb==-1?'on':''}" title="No me gusta" onclick="mAct('${k}','down')">👎${x.fb==-1?' No me gusta ✓':''}</button><button onclick="mAct('${k}','refo')">🔄 Reformular respuesta</button>${x.prev?`<button onclick="mAct('${k}','undo')">↩ Versión anterior</button>`:''}</div>${x.fb==-1&&x.why&&fbK!==k?`<div class="mu sm">Tu opinión: ${esc(x.why)}</div>`:''}${fbK===k?`<div style="margin-top:8px"><textarea id="wy" rows="2" placeholder="¿Qué no te ha gustado? (opcional)">${esc(x.why||'')}</textarea><div class="hb" style="margin-top:6px"><button class="pri" onclick="mAct('${k}','whyr')">Enviar y reformular</button><button onclick="mAct('${k}','whys')">Solo guardar</button><button onclick="mAct('${k}','clear')">Quitar marca</button></div></div>`:''}`;
  return `<div class="m ${x.r}"><div class="mh"><b>${esc(u?prof.alias:cur.name)}</b><details class="mn" ontoggle="mpos(this)"><summary>⋯</summary><div class="mi">${A.map(([a,t])=>`<button onclick="mAct('${k}','${a}')">${t}</button>`).join('')}</div></details></div>${esc(x.x)}${fb}${cfm==k+'del'||cfm==k+'redo'?`<div class="hb" style="margin-top:8px"><span class="sm">${cfm==k+'del'?'¿Borrar este mensaje?':'Se borrarán los mensajes posteriores y el personaje responderá de nuevo desde aquí.'}</span><button class="pri" onclick="mAct('${k}','y${cfm.slice(k.length)}')">Sí</button><button onclick="mAct('${k}','no')">No</button></div>`:''}</div>`}
 async function mAct(k,a){
  document.querySelectorAll('.mn[open]').forEach(m=>m.open=false);
- if(!cur||busy)return;
+ if(!cur)return;if(busy)return toast('Espera a que el personaje termine de escribir.');
  const id=cur.id,i=msgs.findIndex(x=>x.t+'_'+x.r==k),m=msgs[i];if(!m)return;
  const ref=db.doc(mp(id)+'/'+k),up=async d=>{Object.assign(m,d);try{await ref.update(d)}catch(e){alert('No se pudo guardar el cambio')}renderMsgs(true)};
  if(a=='copy'){toast('Copiado');try{await navigator.clipboard.writeText(m.x)}catch(e){const t=document.createElement('textarea');t.value=m.x;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e2){}t.remove()}return}
@@ -373,18 +413,24 @@ async function mAct(k,a){
   try{await delAll(msgs.slice(i+1).map(x=>db.doc(mp(id)+'/'+x.t+'_'+x.r)))}catch(e){alert('No se pudo retomar desde aquí');return}
   msgs=msgs.slice(0,i+1);const mt=metas[id]||{};if(mt.sumT>=m.t){metas[id]={...mt,sum:'',sumT:0};try{await db.doc(col()+'/h_'+id).update({sum:'',sumT:0})}catch(e){}}
   renderMsgs(true);send(true);return}
+ if(a=='undo'){await up({x:m.prev,prev:''});toast('Versión anterior restaurada');return}
  if(a=='refo')return refo(m,up);
- if(a=='up'){fbK=null;await up({fb:m.fb==1?0:1});return}
- if(a=='down'){if(m.fb==-1){fbK=fbK===k?null:k;renderMsgs(true)}else{fbK=k;await up({fb:-1})}return}
+ if(a=='up'){fbK=null;const v=m.fb==1?0:1;await up({fb:v});toast(v?'Marcaste: me gusta':'Marca quitada');return}
+ if(a=='down'){if(m.fb==-1){fbK=fbK===k?null:k;renderMsgs(true)}else{fbK=k;await up({fb:-1});toast('Marcaste: no me gusta. Puedes contar qué falló o reformular la respuesta.')}return}
+ if(a=='clear'){fbK=null;await up({fb:0,why:''});toast('Marca quitada');return}
  if(a=='whys'||a=='whyr'){const w=$('wy').value.trim();fbK=null;await up({fb:-1,why:w});if(a=='whyr')await refo(m,up,w)}
 }
+const SERR={not_granted:'Has rechazado el permiso para usar Claude. Recarga la página y pulsa «Permitir» cuando te lo pida.',rate_limited:'Demasiadas peticiones seguidas. Espera unos segundos y vuelve a intentarlo.',refused:'Claude no ha querido reescribir este mensaje. Prueba a explicar con 👎 qué cambiar.',empty_completion:'Claude no devolvió texto. Inténtalo de nuevo.',prompt_too_large:'La conversación es demasiado larga para reformular.',session_expired:'Tu sesión de claude.ai ha caducado. Recarga la página.',sampling_disabled:'Tu organización tiene desactivado el uso de Claude en las páginas.',upstream_error:'Claude no está disponible ahora mismo. Inténtalo en un momento.',cancelled:'La reformulación tardó demasiado y se canceló. Inténtalo de nuevo.'};
+const serr=e=>SERR[e&&e.code]||('No se pudo reformular el mensaje'+(e&&e.code?' ('+e.code+')':'')+'.');
 async function refo(m,up,why){
- if(!sample)return alert('La IA no está disponible en esta vista.');
- const ch=cur,ctx=msgs.slice(-12).map(x=>(x.r=='u'?prof.alias:ch.name)+': '+x.x).join('\n'),old=m.x;
- busy=true;m.x='Reformulando…';renderMsgs(true);
- try{const r=await sample(`Reescribe esta intervención de ${ch.name} en un rol por escrito, manteniendo los mismos hechos y el mismo formato (contexto entre paréntesis y «Nombre: —…»), pero con otras palabras y otra forma de narrarlo. No hables ni decidas por ${prof.alias}.${why?' El usuario no quedó contento por este motivo: '+why+'. Corrígelo.':''} Estilo: ${(RS[ch.rs]||RS.mod)[2]}. Sin emojis, listas ni comentarios fuera de la ficción.\n\nContexto reciente:\n${ctx}\n\nIntervención a reescribir:\n${old}\n\nDevuelve solo el texto reescrito.`,{cache:false,modelTier:'quick'});
-  const v=(r.text||'').trim();m.x=old;busy=false;if(v)await up({x:v});else renderMsgs(true)}
- catch(e){m.x=old;busy=false;renderMsgs(true);alert('No se pudo reformular el mensaje.')}
+ if(!sample)return alert('Reformular necesita la IA, que solo funciona dentro de claude.ai. Abre la página desde claude.ai.');
+ const ch=cur,ctx=msgs.slice(-12).map(x=>(x.r=='u'?prof.alias:ch.name)+': '+x.x).join('\n'),old=m.x,ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),90000);
+ busy=true;m.x='Reformulando…';renderMsgs(true);toast('Reformulando la respuesta…');
+ try{const r=await sample(`Reescribe esta intervención de ${ch.name} en un rol por escrito, manteniendo los mismos hechos y el mismo formato (contexto entre paréntesis y «Nombre: —…»), pero con otras palabras y otra forma de narrarlo. No hables ni decidas por ${prof.alias}.${why?' El usuario no quedó contento por este motivo: '+why+'. Corrígelo.':''} Estilo: ${(RS[ch.rs]||RS.mod)[2]}. Sin emojis, listas ni comentarios fuera de la ficción.\n\nContexto reciente:\n${ctx}\n\nIntervención a reescribir:\n${old}\n\nDevuelve solo el texto reescrito.`,{cache:false,modelTier:'quick',signal:ctl.signal});
+  const v=(r.text||'').trim();m.x=old;busy=false;
+  if(v)await up({x:v,prev:old});else{renderMsgs(true);alert(serr({code:'empty_completion'}))}}
+ catch(e){m.x=old;busy=false;renderMsgs(true);alert(serr(e))}
+ finally{clearTimeout(tm)}
 }
 let fg='',fw='',fwt='';
 const WORLDS=['Medieval','Futurista','Postapocalíptico','Distópico','Ciencia ficción','Mágico','Histórico o antiguo','Zombis','Cyberpunk'];
